@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Humanize App</title>
+  <!-- Google Fonts: Playfair Display for headings and Poppins for body -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    /* Global Reset & Base Styles */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #ffeef8; /* Light pinkish background */
+      color: #333;
+      line-height: 1.6;
+    }
+    a { text-decoration: none; color: inherit; }
+      
+    /* Navigation Bar */
+    .navbar {
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #d81b60; /* Deep pink */
+      color: #fff;
+      padding: 15px 30px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .navbar .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8em;
+      font-weight: 600;
+    }
+    .navbar .user-info { font-size: 0.9em; cursor: pointer; }
+    .hamburger { font-size: 1.8em; cursor: pointer; user-select: none; }
+      
+    /* Dropdown Menu with attractive animated appearance */
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 65px;
+      right: 30px;
+      background: linear-gradient(135deg, #ff80ab, #ff4081);
+      color: #fff;
+      width: 220px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      z-index: 1000;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .dropdown-menu ul { list-style: none; padding: 10px 0; }
+    .dropdown-menu ul li {
+      padding: 12px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.3);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .dropdown-menu ul li:last-child { border-bottom: none; }
+    .dropdown-menu ul li:hover { background: rgba(255,255,255,0.2); }
+      
+    /* Header Section */
+    header {
+      text-align: center;
+      padding: 45px 20px;
+      background: linear-gradient(135deg, #ec407a, #f48fb1);
+      color: #fff;
+    }
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.6em;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    header p { font-size: 0.9em; }
+      
+    /* Main Container */
+    .container { max-width: 1100px; margin: 30px auto; padding: 20px; }
+      
+    /* Input & Output Sections */
+    .input-section, .output-section {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+    }
+    .input-section textarea,
+    .output-section textarea {
+      width: 100%;
+      height: 300px;
+      padding: 15px;
+      border: 2px solid #ddd;
+      border-radius: 0;
+      resize: none;
+      font-size: 1em;
+    }
+    #inputCounter {
+      margin-top: 10px;
+      font-size: 0.95em;
+      color: #555;
+    }
+    .limit-exceeded { color: red; font-weight: 600; }
+      
+    .button-group { margin-top: 20px; display: flex; gap: 15px; }
+    .button-group button {
+      flex: 1;
+      padding: 15px;
+      border: none;
+      border-radius: 4px;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .button-detect {
+      background: #c2185b;
+      color: #fff;
+    }
+    .button-detect:hover { background: #ad1457; transform: scale(1.02); }
+    .button-humanize {
+      background: linear-gradient(45deg, #e91e63, #ec407a);
+      color: #fff;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+    .button-humanize:hover { background: linear-gradient(45deg, #d81b60, #e040fb); transform: scale(1.02); }
+      
+    /* Output Section Overlay */
+    .output-section {
+      border: 4px solid;
+      border-image: linear-gradient(45deg, #f06292, #f8bbd0) 1;
+      position: relative;
+    }
+    #copyButton {
+      position: absolute;
+      bottom: 15px;
+      right: 15px;
+      padding: 8px 15px;
+      background: #c2185b;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    #copyButton:hover { background: #ad1457; }
+      
+    /* Subscription Packages */
+    .subscriptions { margin: 40px 0; }
+    .subscriptions h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #c2185b;
+      font-size: 2em;
+    }
+    .plan-toggle { text-align: center; margin-bottom: 20px; }
+    .plan-toggle button {
+      background: #fff;
+      border: 2px solid #c2185b;
+      color: #c2185b;
+      padding: 10px 20px;
+      margin: 0 5px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      font-weight: 600;
+    }
+    .plan-toggle button.active,
+    .plan-toggle button:hover {
+      background: #c2185b;
+      color: #fff;
+    }
+    .plans {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+    .plan {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 20px;
+      width: 300px;
+      text-align: center;
+    }
+    .plan h3 { margin-bottom: 10px; color: #333; font-weight: 600; }
+    .plan .price {
+      font-size: 1.5em;
+      margin-bottom: 10px;
+      color: #e91e63;
+      font-weight: 600;
+    }
+    .plan ul { text-align: left; margin-bottom: 15px; list-style: none; padding: 0; }
+    .plan ul li { margin: 8px 0; font-size: 0.95em; }
+    .plan ul li span { margin-right: 8px; font-weight: 600; }
+    .plan button {
+      background: #c2185b;
+      color: #fff;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-size: 1em;
+      font-weight: 600;
+    }
+    .plan button:hover { background: #ad1457; }
+      
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 20px;
+      background: #c2185b;
+      color: #fff;
+      font-size: 1em;
+    }
+    footer a.support-link,
+    footer a.terms-link,
+    footer a.contact-link {
+      color: #fff;
+      font-weight: 600;
+      text-decoration: underline;
+      cursor: pointer;
+      display: block;
+      margin: 5px 0;
+    }
+      
+    /* Modal Styles (Common for all modals) */
+    .modal, .humanize-modal, .terms-modal, .forgot-modal, .otp-modal, .reset-modal, .card-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+    .modal-content, .terms-modal .modal-inner, .humanize-modal .modal-inner,
+    .forgot-modal .modal-inner, .otp-modal .modal-inner, .reset-modal .modal-inner,
+    .card-modal .modal-inner {
+      background: #fff;
+      padding: 20px 30px;
+      border-radius: 8px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80%;
+      overflow-y: auto;
+    }
+    .modal-close { float: right; cursor: pointer; font-size: 1.5em; color: #333; }
+      
+    /* Humanize Modal Specific */
+    .humanize-modal h3 {
+      margin-bottom: 15px;
+      text-align: center;
+      font-weight: 600;
+    }
+    .feature-list { list-style: none; padding: 0; }
+    .feature-list li {
+      margin: 10px 0;
+      display: flex;
+      align-items: center;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    .feature-list li span.icon {
+      margin-right: 10px;
+      font-size: 1.2em;
+      font-weight: 600;
+    }
+    .icon.active { color: green; }
+    .icon.locked { color: red; }
+    .humanize-modal button {
+      margin-top: 15px;
+      padding: 12px;
+      background: #e91e63;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-size: 1em;
+      font-weight: 600;
+    }
+    .humanize-modal button:hover { background: #d81b60; }
+      
+    /* Terms & Conditions Modal Specific */
+    .terms-modal .modal-inner h3 {
+      text-align: center;
+      margin-bottom: 15px;
+      font-size: 1.8em;
+      font-weight: 600;
+    }
+    .terms-modal .modal-inner p,
+    .terms-modal .modal-inner li {
+      font-size: 1em;
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+    .terms-modal .modal-inner li { list-style: none; }
+      
+    /* Forgot Password, OTP, Reset Password Modals */
+    .forgot-modal .modal-inner,
+    .otp-modal .modal-inner,
+    .reset-modal .modal-inner {
+      background: #fff;
+      padding: 20px 30px;
+      border-radius: 8px;
+      max-width: 400px;
+      width: 90%;
+    }
+    .forgot-modal h3,
+    .otp-modal h3,
+    .reset-modal h3 {
+      text-align: center;
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+    .forgot-modal input,
+    .otp-modal input,
+    .reset-modal input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1em;
+    }
+    .otp-input {
+      width: 40px;
+      text-align: center;
+      margin-right: 5px;
+      font-size: 1.2em;
+    }
+    .forgot-modal button,
+    .otp-modal button,
+    .reset-modal button {
+      width: 100%;
+      padding: 10px;
+      background: #c2185b;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .forgot-modal button:hover,
+    .otp-modal button:hover,
+    .reset-modal button:hover { background: #ad1457; }
+      
+    /* Payment Modal (Card Info) Specific */
+    .card-modal .modal-inner h3 {
+      text-align: center;
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+    .card-modal input {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1em;
+    }
+    .card-modal button {
+      width: 100%;
+      padding: 10px;
+      background: #c2185b;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .card-modal button:hover { background: #ad1457; }
+      
+    /* Auth Forms */
+    .auth-form {
+      display: none;
+      position: fixed;
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #fff;
+      padding: 20px 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      z-index: 1500;
+      width: 90%;
+      max-width: 400px;
+    }
+    .auth-form h3 { margin-bottom: 15px; text-align: center; font-weight: 600; }
+    .auth-form input {
+      display: block;
+      margin-bottom: 15px;
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1em;
+    }
+    .auth-form button {
+      padding: 10px 20px;
+      background: #c2185b;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      width: 100%;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: 600;
+    }
+      
+    /* Responsive */
+    @media (max-width: 768px) {
+      .plans { flex-direction: column; align-items: center; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="logo">shsjilani</div>
+    <div class="user-info" id="userInfo" onclick="handleLogout()" style="display:none;">Logout</div>
+    <div class="hamburger" onclick="toggleMenu()">☰</div>
+    <!-- Dropdown Menu -->
+    <div class="dropdown-menu" id="dropdownMenu">
+      <ul>
+        <li onclick="togglePricing(); toggleMenu();">Pricing</li>
+        <li onclick="openSupport(); toggleMenu();">Support</li>
+        <li onclick="showLoginForm(); toggleMenu();">Login / Sign Up</li>
+        <li onclick="showPrivacyPolicy(); toggleMenu();">Privacy Policy</li>
+      </ul>
+    </div>
+  </nav>
+    
+  <!-- Header -->
+  <header>
+    <h1>Humanize App</h1>
+    <p>Transform your AI-generated texts into stunning human-like masterpieces</p>
+  </header>
+    
+  <!-- Main Content -->
+  <div class="container">
+    <!-- Input Section -->
+    <div class="input-section">
+      <textarea id="userInput" placeholder="Enter your text here..."></textarea>
+      <div id="inputCounter">Words: 0 / Per Request Limit: 300 | Monthly Usage: 0/1000</div>
+      <div class="button-group">
+        <button class="button-detect" onclick="(currentUser ? handleAIDetection() : (alert('Please log in or sign up to use this feature.'), showLoginForm()))">AI Detection</button>
+        <button class="button-humanize" onclick="(currentUser ? openHumanizeModal() : (alert('Please log in or sign up to use this feature.'), showLoginForm()))">Humanize</button>
+      </div>
+    </div>
+    
+    <!-- Output Section -->
+    <div class="output-section">
+      <textarea id="outputBox" placeholder="Output will appear here..." readonly></textarea>
+      <button id="copyButton" onclick="copyOutput()">Copy Output</button>
+    </div>
+    
+    <!-- Subscription Packages -->
+    <div class="subscriptions">
+      <h2>Subscription Packages</h2>
+      <div class="plan-toggle">
+        <button id="monthlyBtn" class="active" onclick="switchPlan('monthly')">Monthly</button>
+        <button id="yearlyBtn" onclick="switchPlan('yearly')">Yearly</button>
+      </div>
+      <div class="plans" id="plansContainer">
+        <!-- Plans rendered via JavaScript -->
+      </div>
+    </div>
+  </div>
+    
+  <!-- Footer -->
+  <footer>
+    <a href="mailto:shsjilani@gmail.com" class="contact-link">Contact</a>
+    <a href="https://www.facebook.com/share/17To94Fx5e/" target="_blank" class="support-link">Support</a>
+    <a class="terms-link" onclick="showTermsModal()">Terms &amp; Conditions</a>
+  </footer>
+    
+  <!-- Privacy Policy Modal -->
+  <div class="modal" id="privacyModal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closePrivacyPolicy()">×</span>
+      <h2 style="text-align:center; margin-bottom:15px;">Privacy Policy</h2>
+      <ol style="font-size:1em; line-height:1.6;">
+        <li><strong>Data Collection:</strong> We may collect user-inputted text, email (if required), and payment-related information.</li>
+                <li><strong>Data Retention:</strong> Input may be stored temporarily but never disclosed publicly.</li>
+        <li><strong>Data Sharing:</strong> We do not share your data with third parties except for essential payment gateways &amp; analytics.</li>
+        <li><strong>Security Measures:</strong> We use encryption and advanced protocols to safeguard your data.</li>
+        <li><strong>Policy Updates:</strong> You will be notified if our Privacy Policy is updated.</li>
+        <li><strong>Contact:</strong> For inquiries, visit our <a href="https://www.facebook.com/share/17To94Fx5e/" target="_blank" style="color:#d81b60; font-weight:600;">Facebook Page</a>.</li>
+      </ol>
+    </div>
+  </div>
+    
+  <!-- Terms & Conditions Modal -->
+  <div class="terms-modal" id="termsModal">
+    <div class="modal-inner">
+      <span class="modal-close" onclick="closeTermsModal()">×</span>
+      <h3>Terms &amp; Conditions</h3>
+      <ol style="font-size:1em; line-height:1.6;">
+        <li><strong>1️⃣ Purpose of Service</strong>
+          <ul style="margin-left:20px;">
+            <li>Enhances your content to be more human-like without altering its core meaning.</li>
+          </ul>
+        </li>
+        <li style="margin-top:10px;"><strong>2️⃣ Usage Restrictions</strong>
+          <ul style="margin-left:20px;">
+            <li>Non-subscribers are limited to 300 words per request and 1000 words per month for AI Detection.</li>
+            <li>If you wish to exceed these limits, a "Subscribe" prompt will appear.</li>
+          </ul>
+        </li>
+        <li style="margin-top:10px;"><strong>3️⃣ Privacy &amp; Data Protection</strong>
+          <ul style="margin-left:20px;">
+                        <li>Advanced security protocols are in place to protect your data.</li>
+          </ul>
+        </li>
+        <li style="margin-top:10px;"><strong>4️⃣ Limited Liability</strong>
+          <ul style="margin-left:20px;">
+            <li>We are not responsible for any damages arising from the use of this service.</li>
+            <li>Processed content accuracy is not guaranteed.</li>
+          </ul>
+        </li>
+        <li style="margin-top:10px;"><strong>5️⃣ Service Modifications &amp; Termination</strong>
+          <ul style="margin-left:20px;">
+            <li>We reserve the right to modify or discontinue the service at any time.</li>
+            <li>Users will be notified in advance of any changes.</li>
+          </ul>
+        </li>
+      </ol>
+      <p style="text-align:center; margin-top:15px; font-size:1em;">💖 We will never cause harm to our users, In Sha Allah. 💖</p>
+    
+      <ol style="font-size:1em; line-height:1.6; margin-top:15px;">
+        <li>Use of the app for cheating in educational institutions is strictly prohibited. (Example: Copy-pasting answers for assignments or exams.)</li>
+        <li>Users may not copy and claim others’ content as their own. (Violation of copyright laws and dishonest practices are not allowed.)</li>
+        <li>The app must not be used to create or share obscene, religiously offensive, or violent content.</li>
+        <li>It is strictly forbidden to use AI for spreading false information. (Example: Spreading rumors or political propaganda.)</li>
+        <li>Using the app for personal attacks, violating privacy, or defaming others is strictly prohibited.</li>
+        <li>Any use of the app that goes against Islamic Shariah or moral ethics is completely prohibited.</li>
+        <li>Users are solely responsible for their use of the app. The company will not be held liable for any unethical behavior.</li>
+      </ol>
+</div>
+  </div>
+    
+  <!-- Humanize Modal -->
+  <div class="humanize-modal" id="humanizeModal">
+    <div class="modal-inner">
+      <span class="modal-close" onclick="closeHumanizeModal()">×</span>
+      <h3>Humanize Features</h3>
+      <ul class="feature-list" id="featureList">
+        <!-- Dynamically rendered feature list with on/off state -->
+      </ul>
+      <button onclick="confirmHumanize()">Continue</button>
+    </div>
+  </div>
+    
+  <!-- Forgot Password Modal -->
+  <div class="forgot-modal" id="forgotModal">
+    <div class="modal-inner">
+      <span class="modal-close" onclick="closeForgotModal()">×</span>
+      <h3>Forgot Password</h3>
+      <input type="email" id="forgotEmail" placeholder="Enter your email">
+      <button onclick="submitForgotPassword()">Submit</button>
+      <p style="text-align:center; margin-top:10px;">
+        <a href="#" onclick="backToLogin()">Back to Login</a>
+      </p>
+    </div>
+  </div>
+    
+  <!-- OTP Verification Modal -->
+  <div class="otp-modal" id="otpModal">
+    <div class="modal-inner">
+      <span class="modal-close" onclick="closeOTPModal()">×</span>
+      <h3>Enter OTP</h3>
+      <div id="otpInputs" style="display:flex; justify-content:space-between;">
+        <input type="text" class="otp-input" maxlength="1">
+        <input type="text" class="otp-input" maxlength="1">
+        <input type="text" class="otp-input" maxlength="1">
+        <input type="text" class="otp-input" maxlength="1">
+        <input type="text" class="otp-input" maxlength="1">
+        <input type="text" class="otp-input" maxlength="1">
+      </div>
+      <button onclick="submitOTP()">Next</button>
+      <p style="text-align:center; margin-top:10px;">
+        <a href="#" onclick="backToForgot()">Back</a>
+      </p>
+    </div>
+  </div>
+    
+  <!-- Reset Password Modal -->
+  <div class="reset-modal" id="resetModal">
+    <div class="modal-inner">
+      <span class="modal-close" onclick="closeResetModal()">×</span>
+      <h3>Reset Password</h3>
+      <input type="password" id="newPassword" placeholder="Enter new password">
+      <input type="password" id="confirmPassword" placeholder="Confirm new password">
+      <button onclick="resetPassword()">Confirm</button>
+      <p id="resetError" style="color:red; text-align:center; display:none;">Passwords do not match!</p>
+      <p style="text-align:center; margin-top:10px;">
+        <a href="#" onclick="backToOTP()">Back</a>
+      </p>
+    </div>
+  </div>
+    
+  <!-- Payment Modal (Card Information) with Card Holder Name -->
+  <div class="card-modal" id="cardModal">
+    <div class="modal-inner">
+      <span class="modal-close" onclick="closeCardModal()">×</span>
+      <h3>Enter Payment Information</h3>
+      <!-- নতুন ইনপুট: কার্ড হোল্ডারের নাম -->
+      <input type="text" id="cardHolder" placeholder="Card Holder Name">
+      <input type="text" id="cardNumber" placeholder="Card Number">
+      <input type="text" id="cardExpiry" placeholder="Expiry Date (MM/YY)">
+      <input type="text" id="cardCVV" placeholder="CVV">
+      <button onclick="submitPayment()">Submit Payment</button>
+      <p id="cardError" style="color:red; text-align:center; display:none;"></p>
+    </div>
+  </div>
+    
+  <!-- Auth Forms -->
+  <div id="loginForm" class="auth-form">
+    <span class="modal-close" onclick="closeLoginForm()" style="float: right; cursor: pointer; font-size: 1.5em; color: #333;">×</span>
+    <h3>Login</h3>
+    <input type="email" id="loginEmail" placeholder="Email">
+    <input type="password" id="loginPassword" placeholder="Password">
+    <button onclick="handleLogin()">Login</button>
+    <p style="text-align:center; margin-top:10px;">
+      <a href="#" onclick="showForgotModal()">Forgot Password?</a><br>
+      Don't have an account? <a href="#" onclick="showSignupForm()">Sign Up</a>
+    </p>
+  </div>
+  <div id="signupForm" class="auth-form">
+    <span class="modal-close" onclick="closeSignupForm()" style="float: right; cursor: pointer; font-size: 1.5em; color: #333;">×</span>
+    <h3>Sign Up</h3>
+    <input type="email" id="signupEmail" placeholder="Email">
+    <input type="password" id="signupPassword" placeholder="Password (min 8 characters, include letters & numbers)">
+    <button onclick="handleSignup()">Sign Up</button>
+    <p style="text-align:center; margin-top:10px;">Already have an account? <a href="#" onclick="showLoginForm()">Login</a></p>
+  </div>
+    
+  <script>
+    // Global State
+    let currentUser = null; // User data (includes token)
+    let userSubscription = null; // "Basic", "Pro", "Ultimate", or null
+    let currentFeatures = {
+      "100% Human-like Paraphrasing": false,
+      "Bypass all AI detectors such as Turnitin, GptZero, CopyLeaks, Quillbot": false,
+      "Grammatical Accuracy Improvement": false,
+      "Readability Function Enhancement": false,
+      "Length Function Adjustment": false
+    };
+    let usageData = { perRequestUsed: 0, perMonthUsed: 0 };
+    
+    // Selected plan info for subscription (used during payment flow)
+    let selectedPlanData = null;
+    
+    // Helper: Build API request in centralized JSON format
+    function buildRequest(command, dataObj) {
+      const headers = { "Content-Type": "application/json" };
+      if (currentUser && currentUser.token) {
+        headers["Authorization"] = "Bearer " + currentUser.token;
+      }
+      return {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ command, data: dataObj })
+      };
+    }
+    
+    // Backend API URL
+    const API_BASE_URL = window.location.origin;
+    
+    // Get limits based on subscription (default for non-subscribers: 300/1000)
+    function getLimits() {
+      if (!userSubscription) return { perRequest: 300, perMonth: 1000 };
+      if (userSubscription === "Basic") return { perRequest: 2000, perMonth: 5000 };
+      if (userSubscription === "Pro") return { perRequest: 2000, perMonth: 50000 };
+      if (userSubscription === "Ultimate") return { perRequest: 2000, perMonth: 200000 };
+    }
+    
+    // Toggle Hamburger Menu
+    function toggleMenu() {
+      const menu = document.getElementById("dropdownMenu");
+      menu.style.display = (menu.style.display === "block") ? "none" : "block";
+    }
+    
+    // Subscription Data
+    const subscriptionData = {
+      monthly: [
+        {
+          plan: "Basic Plan",
+          price: "$11.99/month",
+          priceValue: 11.99,
+          features: [
+            "5,000 words of AI text humanization per month",
+            "Free AI Detection",
+            "1000 words per request",
+            "100% Human-like Paraphrasing",
+            "Bypass detectors like Turnitin, OptZero, CopyLeaks, Quillbot",
+            "Ling Fusce Act Support",
+            "Restrictions: No Grammatical Accuracy Improvement, No Readability Function Enhancement, No Length Function Adjustment"
+          ]
+        },
+        {
+          plan: "Pro Plan",
+          price: "$14.99/month",
+          priceValue: 14.99,
+          features: [
+            "50,000 words of AI text humanization per month",
+            "Free AI Detection",
+            "2000 words per request",
+            "100% Human-like Paraphrasing",
+            "Bypass detectors such as Turnitin, GptZero, CopyLeaks, Quillbot",
+            "Grammatical Accuracy Improvement",
+            "Readability Function Enhancement",
+            "Length Function Adjustment",
+            "Priority Support"
+          ]
+        },
+        {
+          plan: "Ultimate Plan",
+          price: "$49.99/month",
+          priceValue: 49.99,
+          features: [
+            "200,000 words of AI text humanization per month",
+            "Free AI Detection",
+            "2000 words per request",
+            "100% Human-like Paraphrasing",
+            "Bypass detectors such as Turnitin, GptZero, CopyLeaks, Quillbot",
+            "Grammatical Accuracy Improvement",
+            "Readability Function Enhancement",
+            "Length Function Adjustment",
+            "Priority Support"
+          ]
+        }
+      ],
+      yearly: [
+        {
+          plan: "Basic Plan",
+          price: "$95.88/year",
+          totalPrice: 95.88,
+          features: [
+            "5,000 words of AI text humanization per month",
+            "Free AI Detection",
+            "1000 words per request",
+            "100% Human-like Paraphrasing",
+            "Bypass detectors like Turnitin, OptZero, CopyLeaks, Quillbot",
+            "Ling Fusce Act Support",
+            "Restrictions: No Grammatical Accuracy Improvement, No Readability Function Enhancement, No Length Function Adjustment"
+          ]
+        },
+        {
+          plan: "Pro Plan",
+          price: "$119.88/year",
+          totalPrice: 119.88,
+          features: [
+            "50,000 words of AI text humanization per month",
+            "Free AI Detection",
+            "2000 words per request",
+            "100% Human-like Paraphrasing",
+            "Bypass detectors such as Turnitin, GptZero, CopyLeaks, Quillbot",
+            "Grammatical Accuracy Improvement",
+            "Readability Function Enhancement",
+            "Length Function Adjustment",
+            "Priority Support"
+          ]
+        },
+        {
+          plan: "Ultimate Plan",
+          price: "$239.88/year",
+          totalPrice: 239.88,
+          features: [
+            "200,000 words of AI text humanization per month",
+            "Free AI Detection",
+            "2000 words per request",
+            "100% Human-like Paraphrasing",
+            "Bypass detectors such as Turnitin, GptZero, CopyLeaks, Quillbot",
+            "Grammatical Accuracy Improvement",
+            "Readability Function Enhancement",
+            "Length Function Adjustment",
+            "Priority Support"
+          ]
+        }
+      ]
+    };
+    
+    // Calculate yearly plan's monthly equivalent with discount
+    subscriptionData.yearly.forEach(plan => {
+      const monthlyPlan = subscriptionData.monthly.find(p => p.plan === plan.plan);
+      if(monthlyPlan){
+        const monthlyPrice = monthlyPlan.priceValue;
+        const yearlyTotal = plan.totalPrice;
+        const monthlyEquivalent = yearlyTotal / 12;
+        const discountPercent = Math.round(((monthlyPrice - monthlyEquivalent) / monthlyPrice) * 100);
+        plan.price = `$${monthlyEquivalent.toFixed(2)}/month (${discountPercent}% cheaper)`;
+      }
+    });
+    
+    function renderPlans(planType = 'monthly'){
+      const plansContainer = document.getElementById('plansContainer');
+      plansContainer.innerHTML = '';
+      subscriptionData[planType].forEach(pkg => {
+        let btnText = "Subscribe";
+        if(currentUser && userSubscription && userSubscription === pkg.plan.replace(" Plan", "")){
+          btnText = "Unsubscribe";
+        }
+        let featuresHTML = "";
+        pkg.features.forEach(feat => {
+          if(feat.trim().toLowerCase().startsWith("restrictions:")){
+            featuresHTML += `<li><span>✖</span><span>${feat.replace(/restrictions:\s*/i, "")}</span></li>`;
+          } else {
+            featuresHTML += `<li><span>✔</span><span>${feat}</span></li>`;
+          }
+        });
+        const planDiv = document.createElement('div');
+        planDiv.className = 'plan';
+        planDiv.innerHTML = `
+          <h3>${pkg.plan}</h3>
+          <div class="price">${pkg.price}</div>
+          <ul>${featuresHTML}</ul>
+          <button onclick="handlePlanAction('${pkg.plan}', '${pkg.price}')">${btnText}</button>
+        `;
+        plansContainer.appendChild(planDiv);
+      });
+    }
+    
+    function switchPlan(planType){
+      document.getElementById('monthlyBtn').classList.remove('active');
+      document.getElementById('yearlyBtn').classList.remove('active');
+      if(planType === 'monthly'){
+        document.getElementById('monthlyBtn').classList.add('active');
+      } else {
+        document.getElementById('yearlyBtn').classList.add('active');
+      }
+      renderPlans(planType);
+    }
+    
+    renderPlans('monthly');
+    
+    document.getElementById('userInput').addEventListener('input', function(){
+      const text = this.value;
+      const wordCount = text.trim().split(/\s+/).filter(word => word !== "").length;
+      const limits = getLimits();
+      const perRequestExceeded = wordCount > limits.perRequest;
+      const perMonthExceeded = (usageData.perMonthUsed + wordCount) > limits.perMonth;
+      let counterText = `Words: ${wordCount} / Per Request Limit: ${limits.perRequest} | Monthly Usage: ${usageData.perMonthUsed}/${limits.perMonth}`;
+      if(perRequestExceeded || perMonthExceeded){
+        counterText = `<span class="limit-exceeded">${counterText} - Please subscribe to use more words.</span>`;
+      }
+      document.getElementById('inputCounter').innerHTML = counterText;
+    });
+    
+    function copyOutput(){
+      const outputBox = document.getElementById('outputBox');
+      outputBox.select();
+      document.execCommand("copy");
+      alert("Output copied to clipboard!");
+    }
+    
+    // AI Detection Feature
+    function handleAIDetection(){
+      if(!currentUser){
+        alert("Please log in or sign up to use this feature.");
+        showLoginForm();
+        return;
+      }
+      const inputText = document.getElementById('userInput').value;
+      if(!inputText.trim()){
+        alert("Please enter some text for AI Detection.");
+        return;
+      }
+      fetch(API_BASE_URL + "/command", buildRequest("ai-detect", { text: inputText }))
+      .then(response => {
+        if(!response.ok) return response.json().then(err => { throw new Error(err.detail || err.error || "Error in API"); });
+        return response.json();
+      })
+      .then(data => {
+        document.getElementById('outputBox').value = `AI Detection Result: ${data.percentage}% AI-generated`;
+      })
+      .catch(err => {
+        console.error("AI Detection error:", err);
+        alert("An error occurred. Please try again.");
+      });
+    }
+    
+    // Humanize Feature
+    function openHumanizeModal(){
+      if(!currentUser){
+        alert("Please log in or sign up to use this feature.");
+        showLoginForm();
+        return;
+      }
+      const inputText = document.getElementById('userInput').value;
+      if(!inputText.trim()){
+        alert("Please enter some text to humanize.");
+        return;
+      }
+      fetch(API_BASE_URL + "/command", buildRequest("humanize", { text: inputText, subscription: userSubscription }))
+      .then(response => response.json())
+      .then(data => {
+        if(document.getElementById('remainingWordsDisplay')){
+          document.getElementById('remainingWordsDisplay').textContent = data.remainingWords || "--";
+        }
+        if(userSubscription === "Pro" || userSubscription === "Ultimate"){
+          currentFeatures = {
+            "100% Human-like Paraphrasing": true,
+            "Bypass all AI detectors such as Turnitin, GptZero, CopyLeaks, Quillbot": true,
+            "Grammatical Accuracy Improvement": true,
+            "Readability Function Enhancement": (userSubscription === "Ultimate"),
+            "Length Function Adjustment": (userSubscription === "Ultimate")
+          };
+        } else {
+          currentFeatures = {
+            "100% Human-like Paraphrasing": true,
+            "Bypass all AI detectors such as Turnitin, GptZero, CopyLeaks, Quillbot": false,
+            "Grammatical Accuracy Improvement": false,
+            "Readability Function Enhancement": false,
+            "Length Function Adjustment": false
+          };
+        }
+        renderFeatures();
+        document.getElementById('humanizeModal').style.display = 'flex';
+      })
+      .catch(err => {
+        console.error("Error in humanize request:", err);
+        alert("Error processing humanize request.");
+      });
+    }
+    
+    function renderFeatures(){
+      const featureList = document.getElementById('featureList');
+      featureList.innerHTML = '';
+      for(let feature in currentFeatures){
+        const li = document.createElement('li');
+        li.innerHTML = `<span class="icon ${currentFeatures[feature] ? 'active' : 'locked'}</span>${currentFeatures[feature] ? 'ON' : 'OFF'}</span><span>${feature}</span>`;
+        li.addEventListener('click', () => {
+          currentFeatures[feature] = !currentFeatures[feature];
+          renderFeatures();
+        });
+        featureList.appendChild(li);
+      }
+    }
+    
+    function confirmHumanize(){
+      const inputText = document.getElementById('userInput').value;
+      fetch(API_BASE_URL + "/command", buildRequest("humanize-confirm", { text: inputText, subscription: userSubscription, features: currentFeatures }))
+      .then(response => response.json())
+      .then(data => {
+        if(data.error){
+          if(confirm(data.error + "\nClick OK to view subscription packages.")){
+            togglePricing();
+          }
+          return;
+        }
+        if(data.wordsUsed) usageData.perMonthUsed = data.wordsUsed;
+        else {
+          const currentWords = inputText.trim().split(/\s+/).filter(word => word !== "").length;
+          usageData.perRequestUsed = currentWords;
+          usageData.perMonthUsed += currentWords;
+        }
+        document.getElementById('outputBox').value = data.humanized_text || inputText + "\n\n[Text has been humanized based on your subscription.]";
+        document.getElementById('humanizeModal').style.display = 'none';
+      })
+      .catch(err => {
+        console.error("Error in humanize confirm:", err);
+        alert("Error confirming humanize process.");
+      });
+    }
+    
+    // Forgot Password Flow
+    function showForgotModal(){
+      document.getElementById('loginForm').style.display = 'none';
+      document.getElementById('forgotModal').style.display = 'block';
+    }
+    function backToLogin(){
+      document.getElementById('forgotModal').style.display = 'none';
+      document.getElementById('loginForm').style.display = 'block';
+    }
+    function submitForgotPassword(){
+      const email = document.getElementById('forgotEmail').value;
+      if(!isValidEmail(email)){
+        alert("Please enter a valid email address.");
+        return;
+      }
+      fetch(API_BASE_URL + "/command", buildRequest("forgot-password", { email }))
+      .then(response => response.json())
+      .then(data => {
+        if(data.success){
+          document.getElementById('forgotModal').style.display = 'none';
+          document.getElementById('otpModal').style.display = 'flex';
+        } else {
+          alert(data.message || "Failed to send OTP. Please try again.");
+        }
+      })
+      .catch(err => {
+        console.error("Forgot Password error:", err);
+        alert("An error occurred. Please try again.");
+      });
+    }
+    
+    // OTP Verification Flow
+    function submitOTP(){
+      const otpInputs = document.querySelectorAll('.otp-input');
+      let otp = "";
+      otpInputs.forEach(input => { otp += input.value; });
+      if(otp.length !== 6){
+        alert("Please enter the complete 6-digit OTP.");
+        return;
+      }
+      fetch(API_BASE_URL + "/command", buildRequest("verify-otp", { otp }))
+      .then(response => response.json())
+      .then(data => {
+        if(data.success){
+          document.getElementById('otpModal').style.display = 'none';
+          document.getElementById('resetModal').style.display = 'flex';
+        } else {
+          alert(data.message || "Invalid OTP. Please try again.");
+        }
+      })
+      .catch(err => {
+        console.error("OTP Verification error:", err);
+        alert("An error occurred. Please try again.");
+      });
+    }
+    
+    function backToOTP(){
+      document.getElementById('resetModal').style.display = 'none';
+      document.getElementById('otpModal').style.display = 'flex';
+    }
+    
+    function resetPassword(){
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      if(newPassword !== confirmPassword){
+        document.getElementById('resetError').style.display = 'block';
+        return;
+      }
+      document.getElementById('resetError').style.display = 'none';
+      fetch(API_BASE_URL + "/command", buildRequest("reset-password", { newPassword }))
+      .then(response => response.json())
+      .then(data => {
+        if(data.success){
+          alert("Password has been changed successfully.");
+          document.getElementById('resetModal').style.display = 'none';
+          showLoginForm();
+        } else {
+          alert(data.message || "Failed to reset password. Please try again.");
+        }
+      })
+      .catch(err => {
+        console.error("Reset Password error:", err);
+        alert("An error occurred. Please try again.");
+      });
+    }
+    
+    // Payment Modal Functions
+    function openCardModal(){
+      document.getElementById('cardModal').style.display = 'flex';
+    }
+    function closeCardModal(){
+      document.getElementById('cardModal').style.display = 'none';
+      document.getElementById('cardError').style.display = 'none';
+    }
+    function submitPayment(){
+      // কার্ড ইনপুট যাচাই
+      const cardHolder = document.getElementById('cardHolder').value.trim();
+      const cardNumber = document.getElementById('cardNumber').value.trim();
+      const cardExpiry = document.getElementById('cardExpiry').value.trim();
+      const cardCVV = document.getElementById('cardCVV').value.trim();
+      
+      // সরল ভ্যালিডেশন: কার্ড হোল্ডারের নাম, কার্ড নম্বর, Expiry ও CVV চেক করা হচ্ছে
+      if(cardHolder === "" || cardNumber.length < 12 || cardExpiry.length < 4 || cardCVV.length < 3){
+        document.getElementById('cardError').textContent = "Please enter valid payment details including card holder name.";
+        document.getElementById('cardError').style.display = 'block';
+        return;
+      }
+      
+      // সাবস্ক্রিপশন প্ল্যানের তথ্য (selectedPlanData) সহ পেমেন্ট ডেটা তৈরি
+      const paymentData = {
+        plan: selectedPlanData.plan,
+        price: selectedPlanData.price,
+        cardHolder,
+        cardNumber,
+        cardExpiry,
+        cardCVV,
+        userId: currentUser.id
+      };
+      
+      fetch(API_BASE_URL + "/command", buildRequest("subscribe", paymentData))
+      .then(response => response.json())
+      .then(data => {
+        if(data.success){
+          userSubscription = selectedPlanData.plan.replace(" Plan", "");
+          alert("Subscription successful for " + selectedPlanData.plan);
+          updateUserUI();
+          closeCardModal();
+          renderPlans(document.getElementById('monthlyBtn').classList.contains('active') ? 'monthly' : 'yearly');
+        } else {
+          document.getElementById('cardError').textContent = data.message || "Subscription failed. Please check your details.";
+          document.getElementById('cardError').style.display = 'block';
+        }
+      })
+      .catch(err => {
+        console.error("Subscription error:", err);
+        alert("An error occurred during subscription.");
+      });
+    }
+    
+    // Email & Password Validation Functions
+    function isValidEmail(email){
+      const re = /^[^\[email protected]\]+@[^\[email protected]\]+\.[^\[email protected]\]+$/;
+      return re.test(email);
+    }
+    function isValidPassword(password){
+      const re = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+      return re.test(password);
+    }
+    
+    // Signup & Login Functions
+    function handleSignup(){
+      const email = document.getElementById('signupEmail').value;
+      const password = document.getElementById('signupPassword').value;
+      if(!isValidEmail(email)){
+        alert("Please enter a valid email address.");
+        return;
+      }
+      if(!isValidPassword(password)){
+        alert("Password must be at least 8 characters long and include both letters and numbers.");
+        return;
+      }
+      fetch(API_BASE_URL + "/command", buildRequest("signup", { email, password }))
+      .then(response => response.json())
+      .then(data => {
+        if(data.success){
+          currentUser = data.user;
+          userSubscription = data.subscriptionPlan;
+          updateUserUI();
+          if(data.freeTrial) {
+            alert("One-time Free Trial: Get 1,000 words free with just one login!");
+          }
+          closeForms();
+          renderPlans(document.getElementById('monthlyBtn').classList.contains('active') ? 'monthly' : 'yearly');
+        } else {
+          alert(data.message || "Signup failed. Please try again.");
+        }
+      })
+      .catch(err => {
+        console.error("Signup error:", err);
+        alert("An error occurred during signup.");
+      });
+    }
+    
+    function handleLogin(){
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      if(!email.trim() || !password.trim()){
+        alert("Please fill in both email and password.");
+        return;
+      }
+      fetch(API_BASE_URL + "/command", buildRequest("login", { email, password }))
+      .then(response => response.json())
+      .then(data => {
+        if(data.success){
+          currentUser = data.user;
+          userSubscription = data.subscriptionPlan;
+          updateUserUI();
+          if(data.freeTrial) {
+            alert("One-time Free Trial: Get 1,000 words free with just one login!");
+          }
+          closeForms();
+          renderPlans(document.getElementById('monthlyBtn').classList.contains('active') ? 'monthly' : 'yearly');
+        } else {
+          alert(data.message || "Login failed. Please check your credentials.");
+        }
+      })
+      .catch(err => {
+        console.error("Login error:", err);
+        alert("An error occurred during login.");
+      });
+    }
+    
+    function updateUserUI(){
+      if(currentUser){
+        document.getElementById('userInfo').style.display = 'block';
+        document.getElementById('userInfo').textContent = "Logout (" + currentUser.email + ")";
+      }
+    }
+    
+    function handleLogout(){
+      currentUser = null;
+      userSubscription = null;
+      document.getElementById('userInfo').style.display = 'none';
+      alert("Logged out successfully.");
+    }
+    
+    function togglePricing(){
+      document.querySelector('.subscriptions').scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function openSupport(){
+      window.location.href = "mailto:shsjilani@gmail.com";
+    }
+    
+    function showPrivacyPolicy(){
+      document.getElementById('privacyModal').style.display = 'flex';
+    }
+    function closePrivacyPolicy(){
+      document.getElementById('privacyModal').style.display = 'none';
+    }
+    
+    function showTermsModal(){
+      document.getElementById('termsModal').style.display = 'flex';
+    }
+    function closeTermsModal(){
+      document.getElementById('termsModal').style.display = 'none';
+    }
+    
+    function showLoginForm(){
+      document.getElementById('loginForm').style.display = 'block';
+      document.getElementById('signupForm').style.display = 'none';
+    }
+    function showSignupForm(){
+      document.getElementById('signupForm').style.display = 'block';
+      document.getElementById('loginForm').style.display = 'none';
+    }
+    function closeForms(){
+      document.getElementById('loginForm').style.display = 'none';
+      document.getElementById('signupForm').style.display = 'none';
+    }
+    
+    // Close functions for individual forms/modals
+    function closeLoginForm(){
+      document.getElementById('loginForm').style.display = 'none';
+    }
+    function closeSignupForm(){
+      document.getElementById('signupForm').style.display = 'none';
+    }
+    function closeHumanizeModal(){
+      document.getElementById('humanizeModal').style.display = 'none';
+    }
+    function closeForgotModal(){
+      document.getElementById('forgotModal').style.display = 'none';
+    }
+    function closeOTPModal(){
+      document.getElementById('otpModal').style.display = 'none';
+    }
+    function closeResetModal(){
+      document.getElementById('resetModal').style.display = 'none';
+    }
+    
+    // Centralized Plan Action Handler (Subscribe/Unsubscribe)
+    function handlePlanAction(plan, price){
+      if(!currentUser){
+        alert("Please log in or sign up to subscribe.");
+        showLoginForm();
+        return;
+      }
+      if(userSubscription && userSubscription === plan.replace(" Plan", "")){
+        // Unsubscribe Flow
+        fetch(API_BASE_URL + "/command", buildRequest("unsubscribe", { plan, userId: currentUser.id }))
+        .then(response => response.json())
+        .then(data => {
+          if(data.success){
+            userSubscription = null;
+            alert("Unsubscribed from " + plan);
+            renderPlans(document.getElementById('monthlyBtn').classList.contains('active') ? 'monthly' : 'yearly');
+          } else {
+            alert(data.message || "Unsubscribe failed. Please try again.");
+          }
+        })
+        .catch(err => {
+          console.error("Unsubscribe error:", err);
+          alert("An error occurred during unsubscribe.");
+        });
+      } else {
+        // Subscribe Flow: save selected plan and open payment modal
+        selectedPlanData = { plan, price };
+        openCardModal();
+      }
+    }
+    
+    document.addEventListener('click', function(e){
+      const menu = document.getElementById("dropdownMenu");
+      const hamburger = document.querySelector(".hamburger");
+      if(!menu.contains(e.target) && !hamburger.contains(e.target)){
+        menu.style.display = "none";
+      }
+    });
+  </script>
+</body>
+</html>
